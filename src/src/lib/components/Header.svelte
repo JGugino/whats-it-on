@@ -11,5 +11,6 @@
 		padding: 2rem 0;
 		font-size: 28px;
 		user-select: none;
+		color: #2d232e;
 	}
 </style>

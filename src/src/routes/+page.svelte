@@ -8,16 +8,53 @@
 	let selectedItem = null;
 	let selectedSources = [];
 
+	let lookingFor = '';
+
+	//TODO:
+	//Speed up random finding and only pick titles with streaming available
+	//Move search results to own page or find some way to make it look nicer.
+
 	function changeView(id) {
 		if (id > possibleViews.length) return;
 
 		currentView = possibleViews[id];
 	}
 
-	async function searchForMovieOrShow(e) {
-		const lookingFor = new FormData(e.target).get('movie-search-input');
+	function getRandomNumber(min, max) {
+		min = Math.ceil(min);
+		max = Math.floor(max);
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
 
-		if (!lookingFor) {
+	async function pickRandomMovieOrShow() {
+		//Get all pages and select one randomly
+		const randomSearchURL = `https://api.watchmode.com/v1/list-titles/?apiKey=${
+			import.meta.env.VITE_API_KEY
+		}&type=movie&sort_by=popularity_asc,relevance_desc`;
+
+		const randomSearchResults = await fetch(randomSearchURL).then(async (res) => await res.json());
+		const foundList = randomSearchResults;
+
+		const pickedPage = getRandomNumber(1, foundList.total_pages);
+
+		const pickedPageURL = `https://api.watchmode.com/v1/list-titles/?apiKey=${
+			import.meta.env.VITE_API_KEY
+		}&type=movie&sort_by=popularity_as,relevance_desc&page=${pickedPage}`;
+
+		const pickedPageResults = await fetch(pickedPageURL).then(async (res) => await res.json());
+		const pageResult = pickedPageResults;
+
+		//Take the picked page and pick a random id then load the results page
+
+		const pickedID = getRandomNumber(1, 150);
+
+		const selectedTitle = pageResult.titles[pickedID].id;
+
+		await loadResult(selectedTitle);
+	}
+
+	async function searchForMovieOrShow() {
+		if (!lookingFor || lookingFor == '') {
 			console.error('No movie or show provided.');
 			return;
 		}
@@ -56,31 +93,38 @@
 	function goBackToSearch() {
 		foundItems = [];
 		selectedItem = null;
+		lookingFor = '';
 		changeView(0);
 	}
 </script>
 
 <svelte:head>
 	<title>What's it on? - Find what service a show/movie is on</title>
+	<link rel="stylesheet" href="/app.css" />
 </svelte:head>
 
 <Header />
 
 <main>
 	{#if currentView == possibleViews[0]}
-		<form class="search-form" on:submit|preventDefault={searchForMovieOrShow}>
+		<form class="search-form">
 			<input
 				type="text"
 				name="movie-search-input"
 				id="movie-search-input"
-				placeholder="What are you looking for?"
-				required
+				placeholder="What are we watching today?"
+				bind:value={lookingFor}
 			/>
+			<div class="submit-buttons">
+				<button class="submit-button" on:click|preventDefault={searchForMovieOrShow}>Find it</button
+				>
+				<button class="submit-button" on:click|preventDefault={pickRandomMovieOrShow}
+					>Give me something</button
+				>
+			</div>
 		</form>
 
-		{#if foundItems.length <= 0}
-			<h3 style="text-align: center;">Your search results will show here...</h3>
-		{:else}
+		{#if foundItems.length > 0}
 			<ul>
 				{#each foundItems as item}
 					<li>
@@ -122,7 +166,7 @@
 							<div class="source">
 								<p>{source.name}</p>
 								<p>{source.type}</p>
-								<p>{source.price}</p>
+								<p>{source.price ? '$' + source.price : ''}</p>
 								<p>{source.format}</p>
 							</div>
 						{/each}
@@ -135,14 +179,17 @@
 </main>
 
 <footer>
-	created by gugino - api provided by <a href="https://watchmode.com">watchmode.com</a>
+	created by gugino - api provided by <a href="https://api.watchmode.com">watchmode</a>
 </footer>
 
 <style>
 	.search-form {
 		display: flex;
+		flex-direction: column;
 		justify-content: center;
 		align-items: center;
+		gap: 1rem;
+		margin: 0 0 1rem 0;
 	}
 
 	.search-form > input {
@@ -150,7 +197,32 @@
 		min-width: 400px;
 		font-size: 18px;
 		border-radius: 6px;
-		border: 1px solid #1e1e1e;
+		border: 1px solid #534b52;
+	}
+
+	.search-form > input:focus,
+	.search-form > input:focus-within {
+		border: 2px solid #2d232e;
+		outline: none;
+	}
+
+	.submit-buttons {
+		display: flex;
+		gap: 1rem;
+	}
+
+	.submit-button {
+		background: #474448;
+		color: #f1f0ea;
+		padding: 0.6rem 1rem;
+		border-radius: 6px;
+		border: 1px solid #474448;
+		font-size: 18px;
+		cursor: pointer;
+	}
+
+	.submit-button:hover {
+		background: #2d232e;
 	}
 
 	ul {
@@ -240,5 +312,6 @@
 	footer {
 		text-align: center;
 		margin-top: 2rem;
+		color: #2d232e;
 	}
 </style>
