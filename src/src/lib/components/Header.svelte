@@ -12,5 +12,6 @@
 		font-size: 28px;
 		user-select: none;
 		color: #2d232e;
+		margin: 0 0 2rem 0;
 	}
 </style>

@@ -37,7 +37,7 @@
 			</div>
 		</div>
 	</div>
-	<button on:click>Go Back</button>
+	<button class="back-button" on:click>Go Back</button>
 </section>
 
 <style>
@@ -95,5 +95,19 @@
 	.source {
 		display: flex;
 		gap: 1rem;
+	}
+
+	.back-button {
+		background: #474448;
+		color: #f1f0ea;
+		padding: 0.6rem 1rem;
+		border-radius: 6px;
+		border: 1px solid #474448;
+		font-size: 18px;
+		cursor: pointer;
+	}
+
+	.back-button:hover {
+		background: #2d232e;
 	}
 </style>

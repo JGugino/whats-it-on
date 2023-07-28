@@ -44,7 +44,13 @@
 			bind:currentView
 		/>
 	{:else if currentView == 'results'}
-		<ResultsView bind:foundItems bind:selectedSources bind:selectedItem bind:currentView />
+		<ResultsView
+			bind:lookingFor
+			bind:foundItems
+			bind:selectedSources
+			bind:selectedItem
+			bind:currentView
+		/>
 	{:else if currentView == 'listing'}
 		<InfoView bind:selectedSources bind:selectedItem on:click={goBack} />
 	{/if}

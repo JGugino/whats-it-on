@@ -15,6 +15,7 @@
 	export let selectedSources = [];
 
 	let errorMsg = '';
+	let pickingRandom = false;
 
 	async function userInputSearch() {
 		foundItems = [];
@@ -26,9 +27,12 @@
 		} else {
 			errorMsg = 'Please enter the name of what your looking for';
 		}
+
+		lookingFor = '';
 	}
 
 	async function randomInputSearch() {
+		pickingRandom = true;
 		errorMsg = '';
 
 		const randomTitle = await pickRandomMovieOrShow();
@@ -39,6 +43,7 @@
 		selectedSources = results.sourcesResult;
 
 		currentView = changeView(2);
+		pickingRandom = false;
 	}
 </script>
 
@@ -53,20 +58,26 @@
 		placeholder="What are we watching today?"
 		bind:value={lookingFor}
 	/>
+
 	<div class="submit-buttons">
-		<button
-			class="submit-button"
-			on:click|preventDefault={async () => {
-				await userInputSearch();
-			}}>Find it</button
-		>
-		<button
-			class="submit-button"
-			on:click|preventDefault={async () => {
-				await randomInputSearch();
-			}}>Give me something</button
-		>
+		{#if !pickingRandom}
+			<button
+				class="submit-button"
+				on:click|preventDefault={async () => {
+					await userInputSearch();
+				}}>Find it</button
+			>
+			<button
+				class="submit-button"
+				on:click|preventDefault={async () => {
+					await randomInputSearch();
+				}}>Give me something</button
+			>
+		{:else}
+			<p>Finding you a random movie or show...</p>
+		{/if}
 	</div>
+
 	<p class="disclamer">
 		(note: this app utilizes a free teir of the watchmode API, so some requests may take a minute)
 	</p>
@@ -78,13 +89,13 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		gap: 1rem;
-		margin: 0 0 1rem 0;
+		gap: 1.6rem;
 	}
 
 	.search-form > input {
 		padding: 0.8rem 0.4rem 0.8rem 0.8rem;
-		min-width: 400px;
+		width: 90%;
+		max-width: 600px;
 		font-size: 18px;
 		border-radius: 6px;
 		border: 1px solid #534b52;
@@ -119,6 +130,7 @@
 		font-size: 12px;
 		opacity: 60%;
 		user-select: none;
+		text-align: center;
 	}
 
 	.error {
