@@ -32,7 +32,7 @@
 	<link rel="stylesheet" href="/app.css" />
 </svelte:head>
 
-<Header />
+<Header bind:lookingFor showSearch={currentView == 'results'}/>
 
 <main>
 	{#if currentView == 'search'}
